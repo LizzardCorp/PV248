@@ -15,14 +15,11 @@ class S(BaseHTTPRequestHandler):
         super().__init__(*args,**kwargs)
 
     def _session_cookie(self, game_name,forcenew=False):
-        for id, name in self.sessioncookies.items():
-            if name == game_name:
-                return id
         cookiestring = "\n".join(self.headers.get_all('Cookie',failobj=[]))
         c = cookie()
         c.load(cookiestring)
         c['session_id']=int(uuid.uuid1().int)
-        self.sessioncookies[c['session_id'].value] = game_name
+        self.sessioncookies[int(c['session_id'].value)] = game_name
         self.boards[int(c['session_id'].value)] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         return c['session_id'].value
 
