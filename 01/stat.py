@@ -34,9 +34,9 @@ def century(filePath):
                 year = m.group(4)
                 century = 0
                 if '00' == year[2:]:
-                    century = int(year[:2]) - 1
-                else:
                     century = int(year[:2])
+                else:
+                    century = int(year[:2]) + 1
                 ctr[str(century) + 'th century'] += 1
             else:
                 print("wrong pattern")
