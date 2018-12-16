@@ -24,7 +24,7 @@ class Voice:
     def print_voice(self):
         name = str(self.name) if self.name is not None else ''
         range = None
-        if name is not None:
+        if len(name) > 0:
             range = str(self.range) + ', ' if self.range is not None else ''
         else:
             range = str(self.range) if self.range is not None else ''
@@ -150,13 +150,13 @@ def load(filename):
             edition_name_regex = re.compile( r"Edition: (.*)" )
             composer_regex = re.compile(r"Composer: (.*)")
             editor_regex = re.compile(r"Editor: (.*)")
-            year_regex = re.compile(r"Composition Year: (\d{4})$")
+            year_regex = re.compile(r"Composition Year: (.+ )*(\d{4})( .+)*$")
             partiture_regex = re.compile(r"Partiture: (.*)")
             genre_regex = re.compile(r"Genre: (.*)")
             key_regex = re.compile(r"Key: (.*)")
             incipit_regex = re.compile(r"Incipit: (.*)")
             title_regex = re.compile(r"Title: (.*)")
-            voice_regex = re.compile(r"Voice .*: (.*)")
+            voice_regex = re.compile(r"Voice .*:(.*)")
 
             is_print_id = id_regex.match(line)
             is_edition_name = edition_name_regex.match(line)
@@ -190,22 +190,33 @@ def load(filename):
             elif is_genre:
                 genre = is_genre.group(1).strip()
             elif is_year:
-                if len(is_year.group(1).strip()) > 0:
-                    year = int(is_year.group(1).strip())
+                if len(is_year.group(2).strip()) > 0:
+                    year = int(is_year.group(2).strip())
             elif is_composer:
                 s = is_composer.group(1).split(';')
                 for composer in (s):
                     something = re.split(r'\(|\)', composer)
                     cleared_name = something[0].strip()
                     if len(something) > 1:
-                        regex_comma = re.compile(r"^(\d{4})-+?(\d{4})$")
+                        splitted_dash = None
+                        if '-' in something[1]:
+                            splitted_dash = re.split(r'-+', something[1])
+                        regex_dash = re.compile(r"^\d{4}$")
                         regex_asterix = re.compile(r"^\*(\d{4})$")
                         regex_plus = re.compile(r"^\+(\d{4})$")
-                        is_comma = regex_comma.match(something[1])
+                        is_dash = regex_dash.match(something[1])
                         is_asterix = regex_asterix.match(something[1])
                         is_plus = regex_plus.match(something[1])
-                        if is_comma:
-                            composers.append(Person(cleared_name, int(is_comma.group(1)), int(is_comma.group(2))))
+                        if splitted_dash is not None:
+                            is_born = regex_dash.match(splitted_dash[0])
+                            is_died = regex_dash.match(splitted_dash[1])
+                            born = None
+                            died = None
+                            if is_born:
+                                born = int(splitted_dash[0])
+                            if is_died:
+                                died = int(splitted_dash[1])
+                            composers.append(Person(cleared_name, born, died))
                         elif is_asterix:
                             composers.append(Person(cleared_name, int(is_asterix.group(1)), None))
                         elif is_plus:
@@ -219,17 +230,20 @@ def load(filename):
                 to_join = None
                 line = is_editor.group(1)
                 split = line.split(',')
-                for name in split:
-                    name = name.strip()
-                    if to_join is not None:
-                        editors.append(Person(to_join + ', ' + name, None, None))
-                        to_join = None
-                    elif ' ' in name:
-                        editors.append(Person(name, None, None))
-                    else:
-                        to_join = name
+                if len(split) < 2:
+                    editors.append(Person(split[0].strip(), None, None))
+                else:
+                    for name in split:
+                        name = name.strip()
+                        if to_join is not None:
+                            editors.append(Person(to_join + ', ' + name, None, None))
+                            to_join = None
+                        elif ' ' in name:
+                            editors.append(Person(name, None, None))
+                        else:
+                            to_join = name
             elif is_voice:
-                line = is_voice.group(1)
+                line = is_voice.group(1).strip()
                 if '--' not in line and len(line) > 0:
                     voices.append(Voice(None ,line))
                 else:
@@ -243,5 +257,9 @@ def load(filename):
                         voices.append(Voice(is_regex_range.group(1), None))
                     else:
                         voices.append(None)
-
+    composition = Composition(composition_name, incipit, key, genre, year, voices.copy(), composers.copy())
+    edition = Edition(edition_name, editors.copy(), composition)
+    print_object = Print(edition, print_id, partiture)
+    prints.append(print_object)
+    prints = prints.copy()
     return prints
