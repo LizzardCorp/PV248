@@ -55,7 +55,7 @@ def main():
     file = sys.argv[1]
     version = sys.argv[2]
 
-    if version == 'excercises':
+    if version == 'exercises':
         stat_excercises(file)
     elif version == 'dates':
         stat_dates(file)
