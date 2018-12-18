@@ -156,14 +156,14 @@ class S(BaseHTTPRequestHandler):
             elif y not in [0,1,2]:
                 answer['status'] = "bad"
                 answer['message'] = "Parameter y has to be 0 or 1 or 2!"
-            elif self.boards[game][x][y] is not 0:
+            elif self.boards[game][y][x] is not 0:
                 answer['status'] = "bad"
                 answer['message'] = "Given position is already taken!"
             elif self._who_is_next(self.boards[game]) != player:
                 answer['status'] = "bad"
                 answer['message'] = "It is not your turn!"
             else:
-                self.boards[game][x][y] = player
+                self.boards[game][y][x] = player
                 answer['status'] = "ok"
         json_answer = json.dumps(answer)
         self._set_response()

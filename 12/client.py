@@ -2,6 +2,7 @@ import http.client
 from sys import argv
 import json
 import re
+import time
 
 def create_connection(port=8080, host=''):
     conn = http.client.HTTPConnection(host, port)
@@ -10,9 +11,12 @@ def create_connection(port=8080, host=''):
     string = response.read().decode('utf-8')
     json_data = json.loads(string)
     for game in json_data:
-        print(str(game['id']) + ' ' + game['name'])
+        if len(game['name']) > 0:
+            print(str(game['id']) + ' ' + game['name'])
+        else:
+            print(str(game['id']))
     command = input('Type id number to join a game or type new to start a new game:')
-    if command.startswith('new'):
+    if command.startswith('new ') or command == 'new':
         name_regex = re.compile(r"new (.*)")
         is_name = name_regex.match(command)
         if is_name:
@@ -28,11 +32,47 @@ def create_connection(port=8080, host=''):
     conn.close()
 
 def play(game, player_number, conn):
-    check_game(game, player_number, conn)
-    running = True
-    while running:
-        take_turn(player_number, game, conn)
-        running = check_game(game, player_number, conn)
+    running = check_game(game, player_number, conn)
+    if running == 0:
+        return
+    elif running != player_number:
+        while True:
+            if cycle_check(game, player_number, conn) == 0:
+                return
+            take_turn(player_number, game, conn)
+            if check_game(game, player_number, conn) == 0:
+                return
+    else:
+        while True:
+            take_turn(player_number, game, conn)
+            if check_game(game, player_number, conn) == 0:
+                return
+            if cycle_check(game, player_number, conn) == 0:
+                return
+
+def cycle_check(game, player_number, conn):
+    print("waiting for the other player")
+    while True:
+        time.sleep(1)
+        conn.request("GET", "/status?game=" + str(game))
+        response = conn.getresponse()
+        if response.status == 404:
+            print("invalid input")
+            return 0
+        string = response.read().decode('utf-8')
+        json_data = json.loads(string)
+        if 'winner' in json_data:
+            if json_data['winner'] == player_number:
+                print('you win')
+            elif json_data['winner'] == 0:
+                print('draw')
+            else:
+                print('you lose')
+            return 0
+        if json_data['next'] == player_number:
+            print_board(json_data['board'])
+            return json_data['next']
+
 
 def take_turn(player_number, game, conn):
     playing = True
@@ -50,7 +90,7 @@ def take_turn(player_number, game, conn):
         string = response.read().decode('utf-8')
         json_data = json.loads(string)
         if json_data['status'] == 'bad':
-            print(json_data['message'])
+            print("invalid input")
             continue
         playing = False
 
@@ -59,7 +99,8 @@ def check_game(game, player_number, conn):
     conn.request("GET", "/status?game=" + str(game))
     response = conn.getresponse()
     if response.status == 404:
-        return True
+        print("invalid input")
+        return 0
     string = response.read().decode('utf-8')
     json_data = json.loads(string)
     if 'winner' in json_data:
@@ -69,9 +110,9 @@ def check_game(game, player_number, conn):
             print('draw')
         else:
             print('you lose')
-        return False
+        return 0
     print_board(json_data['board'])
-    return True
+    return json_data['next']
 
 def print_board(board):
     for line in board:
