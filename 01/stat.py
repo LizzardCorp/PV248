@@ -27,19 +27,20 @@ def century(filePath):
             century = m.group(1)
             r = re.compile( "(.*(\d{2})th.*)|(.*(\d{4}).*)" )
             m = r.match(century)
-            if(m.group(2)):
-                year = m.group(2)
-                ctr[year + 'th century'] += 1
-            elif(m.group(4)):
-                year = m.group(4)
-                century = 0
-                if '00' == year[2:]:
-                    century = int(year[:2])
+            if m:
+                if(m.group(2)):
+                    year = m.group(2)
+                    ctr[year + 'th century'] += 1
+                elif(m.group(4)):
+                    year = m.group(4)
+                    century = 0
+                    if '00' == year[2:]:
+                        century = int(year[:2])
+                    else:
+                        century = int(year[:2]) + 1
+                    ctr[str(century) + 'th century'] += 1
                 else:
-                    century = int(year[:2]) + 1
-                ctr[str(century) + 'th century'] += 1
-            else:
-                print("wrong pattern")
+                    print("wrong pattern")
     for k in ctr:
         print(k + ": " + str(ctr[k]))
 
