@@ -1,0 +1,65 @@
+﻿Review od 422633, *0.5
+Vďaka review som zistil, že aj napriek snahe o bezchybnú funkcionalitu sa mi aj tak v úlohe 12 nepodarilo správne ošetriť všetky možné situácie.
+Zároveň som si vďaka review uvedomil, že musím dávať väčší pozor na to aby som nepoužité importy, parametre a pod. vymazával pre čitateľnosť kódu.
+Za prínosné považujem taktiež odporúčanie použitia f-stringov a .format() pre spájanie reťazcov.
+
+-------
+Úloha 8
+-------
+
+stat.py
+
+Kód je přehledně strukturovaný do krátkých funkcí, které se snadno čtou. Na výsledek program dává očekávané hodnoty. Měl bych jen pár poznámek k nepoužitým importům a proměnným.
+
+- from scipy import stats
+    - Nadbytečný import, scipy se v programu nevyužívá
+    - Chtěl bych upozornit na nadbytečné importy, ať už potřebné pro chod programu nebo pro testování. Protože jsou programy spouštěny jen s vybranými balíčky, může se snadno stát, že testy spadnou právě na nepřítomnosti daného balíčku, který vlastně ani není potřeba.
+    - Modul stats má stejný název jako vstupní parametr funkcí.
+- import csv
+    - Nevyužitý import
+- řádek 22
+    - y = json.dumps(x)
+    - JSON řetězec se ukládá do proměnné y, ale ta se ve funkci dále nepoužívá.
+- Přijde mi nadbytečné explicitně přetypovávat hodnoty ve slovníku x, na druhou stranu to zaručuje konzistenci typů.
+
+student.py
+
+Podobně jako ve stat.py i zde mají funkce jasné názvy a jsou krátké a snadno pochopitelné. Kód je přehledný. Stejně jako v stat.py se zde nacházejí nevyužité importy scipy a csv, které bylo možné odstranit. Program dává na výstup očekávané hodnoty.
+
+---------------
+Úloha 11
+---------------
+
+ttt.py
+
+Kód je přehledně strukturovaný do privátních metod. Zaujal mě přístup využití uuid pro zajištění unikátního ID her a cookies pro udržování stavu hry.
+
+- Jméno třídy S je podle mě nedostačující. Z názvu nelze o třídě nic zjistit, především když je daná třída výchozí hodnotou "handler_class" ve funkci "run".
+- _session_cookie má nevyužitý vstupní parametr forcenew
+- (_execute_start obsahuje nadbytečnou inicializaci proměnné id=-1)
+- jen pár drobností ve formátování kódu, které však nemají žádný vliv na jeho funkčnost
+    - v _evaluate_winner je nadbytečná mezera mezi jménem proměnné a přístupu k indexu, což mírně zhoršuje čitelnost kódu na daných řádcích
+
+--------------
+Úloha 12
+--------------
+
+ttt.py
+
+Část komentáře viz úloha 11.
+
+- funkce "run" obsahuje nevyužitý parametr "server_class", byl nahrazen ThreadedHTTPServer v těle funkce
+
+client.py
+
+- funkce take_turn
+    - funkce vezme jako koretní vstup hodnotu "122", kterou rozumí jako x=1 a y=2
+        - takový vstup však zcela neodpovídá očekávánému vstupu "- prompt with your turn (o): (or x); − read 𝑥 and 𝑦 (whitespace separated)"
+        - server akceptuje parametry /play?game=309703214801830511458168339288862930728&player=1&x=001&y=001 , takový vstup "001 001" (x=1, y=1) však není možné v klientovi zadat, neboť očekává řetězec o délce 3; z toho potom také plyne že vstupy " x y" a "x y " (x, y jsou souřadnice; /\s*\d+\s+\d+\s*/) jsou pro klienta nekorektní
+- namísto spojování řetězců přes operátor "+" bych spíše doporučil f-stringy (python 3.6+) nebo metodu .format()
+
+Až na zmíněný nedostatek ve vstupních hodnotách program funguje podle očekávání.
+
+--------------------
+
+Celkově mi bych kód ve všech úlohách ohodnotil jako velmi dobře strukturovaný. Bylo snadné se v programech zorientovat. Po funkční stránce programy dávaly na výstup očekávané hodnoty. V některých případech kód obsahoval nadbytečné importy anebo nevyužité parametry a proměnné. Osobně bych doporučil používat metodu .format() anebo f-stringy pro vytváření řetězců namísto spojování pomocí operátoru "+". Jde však spíš o preferenci.
