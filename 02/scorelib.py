@@ -124,7 +124,7 @@ def load(filename):
     editors = []
 
     for line in open(filename, 'r', encoding='UTF8'):
-        if line == "\n":
+        if line == "\n" and print_id != None:
             composition = Composition(composition_name, incipit, key, genre, year, voices.copy(), composers.copy())
             edition = Edition(edition_name, editors.copy(), composition)
             print_object = Print(edition, print_id, partiture)
