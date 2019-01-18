@@ -1,0 +1,6 @@
+Hra breakout
+- Jedna úroveň
+- Menu pri spustení: New game, Settings, Close
+- Pause menu: Resume, Settings, Back to main menu
+- Zvukové efekty
+- Hra ovládateľná myšou alebo klávesnicou
