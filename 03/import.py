@@ -125,6 +125,5 @@ def process_person(person, conn):
 if __name__ == '__main__':
     if len(sys.argv) !=3:
         print("Wrong number of arguments!")
-        composer(sys.argv[1])
     else:
         database(sys.argv[1], sys.argv[2])
