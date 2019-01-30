@@ -17,7 +17,7 @@ def database(data, output):
 
 def process_print(data, conn):
     cur = conn.cursor()
-    cur.execute("SELECT * FROM print WHERE id=(?)", [data.print_id])
+    cur.execute("SELECT * FROM print WHERE id is (?)", [data.print_id])
     row = cur.fetchone()
     if row is not None:
         return
@@ -36,12 +36,12 @@ def process_edition(data, conn):
 
     score_id = process_composition(data.composition, conn)
     cur = conn.cursor()
-    cur.execute("SELECT * FROM edition WHERE score=(?) and name=(?)", (score_id, data.name))
+    cur.execute("SELECT * FROM edition WHERE score is (?) and name is (?)", (score_id, data.name))
     rows = cur.fetchall()
     for row in rows:
         counter = 0
         for author in authors:
-            cur.execute("SELECT * FROM edition_author WHERE edition=(?) and editor=(?)", (row[0], author))
+            cur.execute("SELECT * FROM edition_author WHERE edition is (?) and editor is (?)", (row[0], author))
             if cur.fetchone() is not None:
                 counter += 1
         if counter == len(authors):
@@ -62,24 +62,28 @@ def process_composition(composition, conn):
         if (author is not None and author.name is not None and len(author.name) is not 0):
             authors.append(process_person(author, conn))
     cur = conn.cursor()
-    cur.execute("SELECT * FROM score WHERE name=(?) and genre=(?) and key=(?) and incipit=(?) and year=(?)", (composition.name, composition.genre, composition.key, composition.incipit, composition.year))
+    cur.execute("SELECT * FROM score WHERE name is (?) and genre is (?) and key is (?) and incipit is (?) and year is (?)", (composition.name, composition.genre, composition.key, composition.incipit, composition.year))
     rows = cur.fetchall()
     for row in rows:
+        same_authors = False
+        same_voices = False
         counter = 0
         for author in authors:
-            cur.execute("SELECT * FROM score_author WHERE score=(?) and composer=(?)", (row[0], author))
+            cur.execute("SELECT * FROM score_author WHERE score is (?) and composer is (?)", (row[0], author))
             if cur.fetchone() is not None:
                 counter += 1
         if counter == len(authors):
-            return row[0]
+            same_authors = True
         index = 1
         counter = 0
         for voice in voices:
-            cur.execute("SELECT * FROM voice WHERE number=(?) and score=(?) and range=(?) and name=(?)", (index, row[0], voice.range, voice.name))
+            cur.execute("SELECT * FROM voice WHERE number is (?) and score is (?) and range is (?) and name is (?)", (index, row[0], voice.range, voice.name))
             if cur.fetchone() is not None:
                 counter += 1
             index +=1
         if counter == len(voices):
+            same_voices = True
+        if (same_authors and same_voices):
             return row[0]
     cur.execute( "insert into score( name, genre, key, incipit, year) values (?,?,?,?,?)", (composition.name, composition.genre, composition.key, composition.incipit, composition.year))
     conn.commit()
@@ -96,7 +100,7 @@ def process_composition(composition, conn):
 
 def process_voice(voice, id, index, conn):
     cur = conn.cursor()
-    cur.execute("SELECT * FROM voice WHERE number=(?) and score=(?) and range=(?) and name=(?)", (index, id, voice.range, voice.name))
+    cur.execute("SELECT * FROM voice WHERE number is (?) and score is (?) and range is (?) and name is (?)", (index, id, voice.range, voice.name))
     row = cur.fetchone()
     if row is not None:
         return row[0]
@@ -106,7 +110,7 @@ def process_voice(voice, id, index, conn):
 
 def process_person(person, conn):
     cur = conn.cursor()
-    cur.execute("SELECT * FROM person WHERE name=(?)", [person.name])
+    cur.execute("SELECT * FROM person WHERE name is (?)", [person.name])
     entity = cur.fetchone()
     if entity is not None:
         born = entity[1]
@@ -115,7 +119,7 @@ def process_person(person, conn):
             born = person.born
         if died is None:
             died = person.died
-        cur.execute("UPDATE person SET born=?, died=? WHERE name=?",(born, died, person.name))
+        cur.execute("UPDATE person SET born=(?), died=(?) WHERE name=(?)",(born, died, person.name))
         conn.commit()
         return entity[0]
     cur.execute( "insert into person( name, born, died) values (?,?,?)", (person.name, person.born, person.died))
