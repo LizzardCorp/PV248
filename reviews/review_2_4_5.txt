@@ -1,0 +1,46 @@
+Review od 475939, *0.5
+V review som sa dozvedel ako lepšie pracovať s regulárnymi výrazmi.
+Ďalej som si uvedomil, že vyberanie informácií z databázy robím veľmi neefektívne.
+Ako prínosné tiež považujem odporúčanie na využívanie prázdnych riadkov pre sprehľadnenie kódu.
+
+Úloha 05
+
+eqn.py
+- program je delený do logický funkcií, ktoré kód sprehľadňujú
+- chválim kontrolu vstupných argumentov a použitie if __name__ == '__main__', to som v tomto predmete často nevidel
+- chýbajú mi v kóde prázdne riadky, ktoré by kód "prevzdušnili" a ľahšie by sa čítal, napríklad pred dlhým for cyklom alebo pred jednotlivými vetvami if
+- na riadku 27 je príšerne dlhý regex s výrečným názvom premennej, s ktorého vôbec nie je jasné čo robí
+- po dlhom hľadení som prišiel na to, že regex vyberá zo vstupného výrazu koeficient a premennú, tento regex sa určite dá napísať oveľa jednoduchšie napríklad použitím [ +-]... v regexe vyberieme všetky možné zápisy koeficientu (bez znamienka alebo s)
+- taktiež ak si správne spomínam na zadanie, koeficient by mal byť vždy pred premennou, čiže celá jedna časť regexu je zbytočná
+- na riadku 19 používaš range(len(...)), to sa dá nahradiť enumerate(...), získaš tak nielen index ale rovno aj prvok na danom indexe
+
+Úloha 04
+
+getprint.py
+- program je dobre čiteteľný a prehľadný
+- pripojenie na databázu by malo byť uzavreté v bloky try... except alebo použi with...
+- okrem toho tu nie je čo vytknúť
+
+search.py
+- program je členený na funkcie, ktoré potom získavajú dáta z databáze
+- takmer všetky prístupy do databáze pracujú s id printu, to znamená, že na získanie autorov score je potrebných až 5 INNER JOIN, čo je zbytočne zložité a "drahé"
+- jednoduchšie by bolo získať autorov score po tom čo získame score_id, v tom prípade nám stačí jediný JOIN
+- podobne s edition author, voices ...
+- opäť mi tu chýbajú prázdne riadky na sprehľadnenie kódu
+- rovnaká pripomienka s použitím try... except pre pripojenie na databázu
+
+Úloha 02
+
+test.py
+- páči sa mi kontrola vstupných argumentov
+
+scorelib.py
+- pekne členený a prehľadný script
+- páči sa mi pomenovanie regexu tak, že z názvu je jasné čo daný regex robí
+- niektoré riadky sú príliš dlhé, v pythone by riadok nemal presiahnuť 80 znakov
+- nepoužívaj dlžku reťazca na zistenie či je reťazec prázdny, stačí: if my_string
+- funkcia load má pomerne dosť veľa úrovní zanorenia, čo zmenšuje čitateľnosť, ja osobne by som to riešil tak, že by som časť kódu oddelil do novej funkcie
+- importuješ sys ale v scripte ho vôbec nepoužívaš
+- premenná is_dash je tiež nepoužitá
+
+Celkovo sa mi kód veľmi páčil, je dobre čitateľný a ľahko sa sleduje priebeh scriptu
