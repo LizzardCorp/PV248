@@ -76,12 +76,13 @@ def process_composition(composition, conn):
             same_authors = True
         index = 1
         counter = 0
-        for voice in voices:
-            cur.execute("SELECT * FROM voice WHERE number is (?) and score is (?) and range is (?) and name is (?)", (index, row[0], voice.range, voice.name))
-            if cur.fetchone() is not None:
-                counter += 1
+        for voice in composition.voices:
+            if voice is not None:
+                cur.execute("SELECT * FROM voice WHERE number is (?) and score is (?) and range is (?) and name is (?)", (index, row[0], voice.range, voice.name))
+                if cur.fetchone() is not None:
+                    counter += 1
             index +=1
-        if counter == len(voices):
+        if counter == len(composition.voices):
             same_voices = True
         if (same_authors and same_voices):
             return row[0]

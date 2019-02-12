@@ -7,6 +7,7 @@ import time
 
 BLACK = ( 0, 0, 0)
 WHITE = ( 255, 255, 255)
+YELLOW = (255,255,0)
 
 def main():
     pygame.mixer.pre_init(44100, -16, 2, 2048)
@@ -107,10 +108,70 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
-    time.sleep(5)
-    pygame.quit()
+    time.sleep(2)
+    main_menu()
 
+def main_menu():
+    clock = pygame.time.Clock()
+    size = (1360, 780)
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption('Breakout')
+    font = pygame.font.Font(None, 36)
+    menu=True
+    selected="start"
 
+    while menu:
+
+        screen.fill(BLACK)
+        title=font.render("Breakout", True, WHITE)
+        if selected=="start":
+            text_start=font.render("START", True, YELLOW)
+        else:
+            text_start = font.render("START", True, WHITE)
+        if selected=="quit":
+            text_quit=font.render("QUIT", True, YELLOW)
+        else:
+            text_quit = font.render("QUIT", True, WHITE)
+
+        title_rect=title.get_rect()
+        start_rect=text_start.get_rect()
+        quit_rect=text_quit.get_rect()
+
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type==pygame.KEYDOWN:
+                if event.key==pygame.K_UP:
+                    selected="start"
+                elif event.key==pygame.K_DOWN:
+                    selected="quit"
+                if event.key==pygame.K_RETURN:
+                    if selected=="start":
+                        main()
+                    if selected=="quit":
+                        pygame.quit()
+                        quit()
+            if event.type == pygame.MOUSEMOTION:
+                if pygame.Rect(1360/2 - (start_rect[2]/2), 300, start_rect[2], start_rect[3]).collidepoint(pygame.mouse.get_pos()):
+                    selected="start"
+                elif pygame.Rect(1360/2 - (quit_rect[2]/2), 360, quit_rect[2], quit_rect[3]).collidepoint(pygame.mouse.get_pos()):
+                    selected="quit"
+            if event.type == pygame.MOUSEBUTTONUP:
+                if selected=="start":
+                    main()
+                if selected=="quit":
+                    pygame.quit()
+                    quit()
+
+        # Main Menu Text
+        screen.blit(title, (1360/2 - (title_rect[2]/2), 80))
+        screen.blit(text_start, (1360/2 - (start_rect[2]/2), 300))
+        screen.blit(text_quit, (1360/2 - (quit_rect[2]/2), 360))
+        pygame.display.update()
+        clock.tick(60)
 
 if __name__ == '__main__':
-    main()
+    pygame.init()
+    main_menu()
+    pygame.quit()
