@@ -84,9 +84,9 @@ def main():
         if len(collision_bar) > 0:
             cube.bounce(0)
 
-        for block in blocks:
-            if cube.cube_collision(block):
-                blocks.remove(block)
+        collision_list = pygame.sprite.spritecollide(cube, blocks, True)
+        if len(collision_list) > 0:
+            cube.bounce(0)
 
         if len(blocks) < 1:
             #winner.play()
